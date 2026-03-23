@@ -6,6 +6,7 @@ import * as stock from './stock.js';
 import * as file from './file.js';
 import * as sentiment from './sentiment.js';
 import * as indexPdf from './index_pdf.js';
+import * as rag from './rag_search.js';
 
 export const toolDefinitions = [
     calculate.definition,
@@ -16,6 +17,7 @@ export const toolDefinitions = [
     file.definition,
     sentiment.definition,
     indexPdf.definition,
+    rag.definition,
 ];
 
 export const toolHandlers = {
@@ -27,6 +29,6 @@ export const toolHandlers = {
     read_file: file.handler,
     analyze_sentiment: sentiment.handler,
     index_pdf: indexPdf.handler,
-
+    rag_search: rag.handler,
 };
 
