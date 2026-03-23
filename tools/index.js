@@ -4,6 +4,7 @@ import * as db from './db.js';
 import * as weather from './weather.js';
 import * as stock from './stock.js';
 import * as file from './file.js';
+import * as sentiment from './sentiment.js';
 
 export const toolDefinitions = [
     calculate.definition,
@@ -12,6 +13,7 @@ export const toolDefinitions = [
     weather.definition,
     stock.definition,
     file.definition,
+    sentiment.definition,
 ];
 
 export const toolHandlers = {
@@ -21,5 +23,6 @@ export const toolHandlers = {
     get_weather: weather.handler,
     get_stock_price: stock.handler,
     read_file: file.handler,
+    analyze_sentiment: sentiment.handler,
 };
 
