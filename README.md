@@ -117,13 +117,11 @@ http://localhost:6274/
 
 Set the following parameters:
 
-Transport Type: STDIO
-Command: node
-Arguments: index.mjs
+- Transport Type: **STDIO**
+- Command: **node**
+- Arguments: **index.mjs**
 
-Then click the "Connect" Button
-
-
+Then click the **Connect** Button.
 
 ## Production Features
 
