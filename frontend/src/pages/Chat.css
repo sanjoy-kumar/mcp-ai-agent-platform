@@ -189,6 +189,7 @@ body, html {
 .chat-message p { margin: 8px 0; }
 .chat-message ul { padding-left: 20px; }
 .chat-message li { margin-bottom: 4px; }
+.chat-message ol { padding-left: 20px; }
 
 
 /* ========================= */

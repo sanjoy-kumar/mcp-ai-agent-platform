@@ -19,18 +19,18 @@ A production-ready multi-tool AI agent system that combines RAG (PDF search), da
 ## 📸 Screenshots
 
 ### 🔐 Authentication (Login / Register)
-![Login](./screenshots/login.png)
-![Register](./screenshots/register.png)
+![Login](./frontend/public/screenshots/login.png)
+![Register](./frontend/public/screenshots/register.png)
 
 ---
 
 ### 💬 Chat Interface (ChatGPT-style UI)
-![Chat UI](./screenshots/chat.png)
+![Chat UI](./frontend/public/screenshots/chat.png)
 
 ---
 
 ### 📂 Multi-tool AI Responses
-![AI Response](./screenshots/response.png)
+![AI Response](./frontend/public/screenshots/response.png)
 
 ---
 
@@ -172,11 +172,12 @@ OPENAI_API_KEY=your_api_key
 ---
 
 ## 📌 Future Improvements
-🔄 Streaming responses (real-time typing)
-📤 File upload UI
-🧠 AI-generated chat titles
-📊 Analytics dashboard
-🌐 Deployment (Docker + Cloud)
+
+- 🔄 Streaming responses (real-time typing)
+- 📤 File upload UI
+- 🧠 AI-generated chat titles
+- 📊 Analytics dashboard
+- 🌐 Deployment (Docker + Cloud)
 
 ---
 
