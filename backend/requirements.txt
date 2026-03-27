@@ -1,0 +1,8 @@
+flask 
+flask-cors 
+sqlalchemy 
+psycopg2-binary 
+requests
+flask-jwt-extended 
+bcrypt
+flask_sqlalchemy
