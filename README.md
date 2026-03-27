@@ -52,6 +52,7 @@ A production-ready multi-tool AI agent system that combines RAG (PDF search), da
 
 ## 🏗️ Architecture
 
+```text
 Frontend (React)
 │
 ▼
@@ -69,11 +70,14 @@ MCP Server (Tools Layer)
 ├── Database (Postgres)
 ├── Sentiment Analysis
 └── Calculator
+```
+---
 
 ## 🧩 Architecture Diagram (Visual)
 
 ![Architecture](./frontend/public/screenshots/architecture.png)
 
+---
 
 ## ⚙️ Tech Stack
 
@@ -95,6 +99,8 @@ MCP Server (Tools Layer)
 ### 🔹 Database
 - PostgreSQL / MySQL
 
+---
+
 ## 🔄 How It Works
 
 1. User sends query from React UI  
@@ -104,15 +110,17 @@ MCP Server (Tools Layer)
 5. Tools execute (weather, DB, RAG, etc.)  
 6. Response returned to frontend  
 
+---
 
 ## 🧪 Example Queries
 
+- What is the weather in Toronto?
+- Read file test.txt
+- Summarize my PDF
+- What is Apple stock price?
+- Analyze sentiment: "I love this product"
 
-What is the weather in Toronto?
-Read file test.txt
-Summarize my PDF
-What is Apple stock price?
-Analyze sentiment: "I love this product"
+---
 
 ## 🚀 Getting Started
 
@@ -149,6 +157,7 @@ cd frontend
 npm install
 npm run dev
 ```
+---
 
 ## 🔐 Environment Variables
 
@@ -160,6 +169,8 @@ DB_URL=your_database_url
 OPENAI_API_KEY=your_api_key
 ```
 
+---
+
 ## 📌 Future Improvements
 🔄 Streaming responses (real-time typing)
 📤 File upload UI
@@ -167,12 +178,16 @@ OPENAI_API_KEY=your_api_key
 📊 Analytics dashboard
 🌐 Deployment (Docker + Cloud)
 
+---
+
 ## 📜 License
 
 MIT License
+
+---
 
 ## 👨‍💻 Author
 
 Sanjoy Kumar Das
 
-
+---
