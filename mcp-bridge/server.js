@@ -1,10 +1,8 @@
 import express from "express";
 import cors from "cors";
 import 'dotenv/config';
-// OR
 import dotenv from 'dotenv';
 dotenv.config();
-
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
@@ -12,12 +10,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/**
- * 🔌 Connect to your MCP server
- */
+// Connect to MCP server
+
 const transport = new StdioClientTransport({
     command: "node",
-    args: ["../mcp-server/index.mjs"], // adjust path
+    args: ["../mcp-server/index.mjs"],
 });
 
 const client = new Client({
@@ -29,9 +26,9 @@ await client.connect(transport);
 
 console.log("✅ Connected to MCP server");
 
-/**
- * 🚀 Chat endpoint
- */
+
+// Chat endpoint
+
 app.post("/agent", async (req, res) => {
     try {
         const { query } = req.body;
@@ -54,14 +51,13 @@ app.post("/agent", async (req, res) => {
     }
 });
 
-/**
- * Health check
- */
+// Health check
+
 app.get("/", (req, res) => {
-    res.send("MCP Bridge Running 🚀");
+    res.send("MCP Bridge Running...");
 });
 
 app.listen(3000, () => {
-    console.log("🌐 MCP Bridge running on http://localhost:3000");
+    console.log("MCP Bridge running on http://localhost:3000");
 });
 
