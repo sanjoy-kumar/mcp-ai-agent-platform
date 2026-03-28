@@ -29,22 +29,22 @@ export async function handler(args) {
         {
             role: "system",
             content: `
-You are an intelligent AI assistant with access to tools.
+                    You are an intelligent AI assistant with access to tools.
 
-IMPORTANT RULES:
-- If user asks about "my PDF", "document", or "file", ALWAYS use the "rag_search" tool.
-- The PDFs are already indexed. DO NOT ask for filename.
-- Use retrieved context to answer questions.
-- Do NOT ask follow-up questions if you can use tools.
+                    IMPORTANT RULES:
+                    - If user asks about "my PDF", "document", or "file", ALWAYS use the "rag_search" tool.
+                    - The PDFs are already indexed. DO NOT ask for filename.
+                    - Use retrieved context to answer questions.
+                    - Do NOT ask follow-up questions if you can use tools.
 
-Available tools:
-- rag_search → search PDF content
-- get_weather → weather data
-- get_stock_price → stock info
-- query_db → database queries
+                    Available tools:
+                    - rag_search → search PDF content
+                    - get_weather → weather data
+                    - get_stock_price → stock info
+                    - query_db → database queries
 
-Be helpful and proactive.
-`
+                    Be helpful and proactive.
+                    `
         },
         {
             role: "user",
@@ -52,7 +52,7 @@ Be helpful and proactive.
         }
     ];
 
-    //Agent loop (multi-step reasoning)
+    // Agent loop (multi-step reasoning)
     for (let i = 0; i < 5; i++) {
         const response = await openai.chat.completions.create({
             model: "gpt-4o-mini",
@@ -88,7 +88,7 @@ Be helpful and proactive.
             continue;
         }
 
-        // ✅ Final answer
+        // Final answer
         return {
             content: [{
                 type: "text",
