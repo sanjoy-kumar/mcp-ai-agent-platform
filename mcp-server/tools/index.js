@@ -8,6 +8,7 @@ import * as sentiment from './sentiment.js';
 import * as indexPdf from './index_pdf.js';
 import * as rag from './rag_search.js';
 import * as agent from './agent.js';
+import * as webSearch from './web_search.js'
 
 export const toolDefinitions = [
     calculate.definition,
@@ -20,6 +21,7 @@ export const toolDefinitions = [
     indexPdf.definition,
     rag.definition,
     agent.definition,
+    webSearch.definition,
 ];
 
 export const toolHandlers = {
@@ -33,5 +35,6 @@ export const toolHandlers = {
     index_pdf: indexPdf.handler,
     rag_search: rag.handler,
     agent: agent.handler,
+    web_search: webSearch.handler,
 };
 
