@@ -3,6 +3,7 @@ import { openai } from "../services/openai.js";
 import { toolHandlers } from "./index.js";
 import { toOpenAITools } from "../utils/openai-tools.js";
 import { validate } from '../utils/validator.js';
+import { redis } from "../services/redis.js";
 
 const schema = z.object({
     query: z.string()
@@ -10,7 +11,7 @@ const schema = z.object({
 
 export const definition = {
     name: "agent",
-    description: "Advanced AI agent with tool-calling (weather, DB, RAG, etc.)",
+    description: "Advanced AI agent with tool-calling and caching",
     inputSchema: {
         type: "object",
         properties: {
@@ -22,6 +23,13 @@ export const definition = {
 
 export async function handler(args) {
     const { query } = validate(schema, args);
+    // --- REDIS CACHE CHECK ---
+    const cacheKey = `agent_cache:${query.trim().toLowerCase()}`;
+    const cachedResponse = await redis.get(cacheKey);
+
+    if (cachedResponse) {
+        return JSON.parse(cachedResponse);
+    }
 
     const tools = toOpenAITools();
 
@@ -35,6 +43,8 @@ export async function handler(args) {
                     - If user asks about "my PDF", "document", or "file", ALWAYS use the "rag_search" tool.
                     - The PDFs are already indexed. DO NOT ask for filename.
                     - Use retrieved context to answer questions.
+                    - Use "web_search" to find current information online.
+                    - Use "query_db" for internal database lookups.
                     - Do NOT ask follow-up questions if you can use tools.
 
                     Available tools:
@@ -42,6 +52,7 @@ export async function handler(args) {
                     - get_weather → weather data
                     - get_stock_price → stock info
                     - query_db → database queries
+                    - web_search → search the live internet for latest news/data
 
                     Be helpful and proactive.
                     `
@@ -52,7 +63,7 @@ export async function handler(args) {
         }
     ];
 
-    // Agent loop (multi-step reasoning)
+    // --- Agent loop (multi-step reasoning) ---
     for (let i = 0; i < 5; i++) {
         const response = await openai.chat.completions.create({
             model: "gpt-4o-mini",
@@ -88,13 +99,18 @@ export async function handler(args) {
             continue;
         }
 
-        // Final answer
-        return {
+        // --- PREPARE FINAL ANSWER & CACHE IT ---
+        const finalResult = {
             content: [{
                 type: "text",
                 text: message.content
             }]
         };
+
+        // --- Cache the result for 1 hour (3600 seconds) ----
+        await redis.set(cacheKey, JSON.stringify(finalResult), 'EX', 3600);
+
+        return finalResult;
     }
 
     throw new Error("Agent loop exceeded");
