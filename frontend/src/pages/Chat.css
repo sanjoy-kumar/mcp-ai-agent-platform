@@ -302,3 +302,34 @@ body, html {
   }
 }
 
+.tool-box {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.tool-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: bold;
+}
+
+.tool-tag {
+  background-color: #f0f4f8;
+  border: 1px solid #d1d9e0;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #444;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.tool-tag:hover {
+  background-color: #e2e8f0;
+  border-color: #cbd5e1;
+}

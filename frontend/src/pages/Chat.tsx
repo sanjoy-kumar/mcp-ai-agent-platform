@@ -6,8 +6,8 @@ import ReactMarkdown from "react-markdown";
 interface Message {
   role: "user" | "assistant";
   text: string;
+  tools?: string[]; 
 }
-
 interface Session {
   id: number;
   title: string;
@@ -170,10 +170,10 @@ export default function Chat() {
       });
 
       const botMessage: Message = {
-        role: "assistant",
-        text: res.data.result
-      };
-
+            role: "assistant",
+            text: res.data.result,
+            tools: res.data.tools
+        };
       updateSession(activeSession.id, [
         ...activeSession.messages,
         userMessage,
@@ -285,18 +285,45 @@ export default function Chat() {
         <div className="chat-header">
           🤖 MCP AI Agent Platform
         <h3 style={{fontSize:"14px"}}>A unified platform for intelligent AI agents and tool orchestration.</h3>
-
-        </div>
+        </div>     
         
-
         <div className="chat-box">
           {activeSession?.messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`chat-message ${msg.role}`}
-            >
-              <ReactMarkdown>{msg.text}</ReactMarkdown>
-            </div>
+
+                <div key={i} className={`chat-message ${msg.role}`}>
+                <ReactMarkdown>{msg.text}</ReactMarkdown>
+
+                {msg.tools && msg.tools.length > 0 && (
+                <div className="tool-box">
+                    <span className="tool-label">🔧 Tools: </span>
+                    {msg.tools
+                        .filter(tool => tool !== 'agent') // Hide the orchestrator itself
+                        .map((tool) => (
+                            <span className="tool-tag" key={tool}>
+                                {/* Real-time & Data Tools */}
+                                {tool === "web_search" && "🌐 Web Search"}
+                                {tool === "rag_search" && "📄 Document RAG"}
+                                {tool === "query_db" && "🗄 Database"}
+                                {tool === "get_weather" && "🌤 Weather"}
+                                {tool === "get_stock_price" && "📈 Stocks"}
+                                
+                                {/* File & Content Tools */}
+                                {tool === "read_file" && "📁 File Reader"}
+                                {tool === "index_pdf" && "⚙️ PDF Indexer"}
+                                {tool === "analyze_sentiment" && "🎭 Sentiment"}
+                                
+                                {/* Utility Tools */}
+                                {tool === "calculate" && "🔢 Calculator"}
+                                {tool === "health_check" && "🩺 System Health"}
+                                
+                                {/* Fallback for unknown tools */}
+                                {!["web_search", "rag_search", "query_db", "get_weather", "get_stock_price", "read_file", "index_pdf", "analyze_sentiment", "calculate", "health_check"].includes(tool) && `🛠 ${tool}`}
+                            </span>
+                    ))}
+                </div>
+                )}
+                            
+                </div>
           ))}
 
           {loading && (
