@@ -67,7 +67,23 @@ export async function handler(args) {
                 - anything time-sensitive
                 - when other tools do not provide enough info
 
-                3. Use "query_db" for structured/internal data
+                3. Use "query_db" for database queries
+
+                    STRICT RULES for query_db:
+                    - If user asks about users → use query_db with queryName="get_users"
+                    - If user asks about chats/messages → use query_db with queryName="get_chats"
+                    - If user asks about sessions → use query_db with queryName="get_sessions"
+
+                    - ALWAYS pass queryName explicitly when calling query_db
+                    - DO NOT guess SQL
+                    - DO NOT answer without calling query_db
+
+                    Examples:
+                    User: "show user list"
+                    → call query_db with { "queryName": "get_users" }
+
+                    User: "show chat messages"
+                    → call query_db with { "queryName": "get_chats" }
 
                 4. Use "get_weather" for weather
 
@@ -78,7 +94,6 @@ export async function handler(args) {
                 - If unsure → use web_search
                 - Do NOT ask user for filenames
                 - Combine tools when needed
-                - Use "query_db" ONLY when you know the exact query. If unsure, do NOT use it.
 
                 Be helpful, accurate, and concise.
             `
@@ -105,7 +120,22 @@ export async function handler(args) {
 
             for (const toolCall of message.tool_calls) {
                 const name = toolCall.function.name;
-                const toolArgs = JSON.parse(toolCall.function.arguments);
+                let toolArgs = JSON.parse(toolCall.function.arguments || "{}");
+
+                if (name === "query_db") {
+                    if (!toolArgs.queryName) {
+                        if (normalizedQuery.includes("user")) {
+                            toolArgs.queryName = "get_users";
+                        } else if (
+                            normalizedQuery.includes("chat") ||
+                            normalizedQuery.includes("message")
+                        ) {
+                            toolArgs.queryName = "get_chats";
+                        } else if (normalizedQuery.includes("session")) {
+                            toolArgs.queryName = "get_sessions";
+                        }
+                    }
+                }
 
                 const tool = toolHandlers[name];
                 if (!tool) throw new Error(`Tool not found: ${name}`);

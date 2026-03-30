@@ -18,6 +18,8 @@ pool.on('error', (err) => {
 
 // SAFE predefined queries
 export const queries = {
-    getUsers: "SELECT * FROM users LIMIT 10",
+    get_users: "SELECT * FROM users LIMIT 10",
+    get_chats: "SELECT * FROM chat_messages LIMIT 10",
+    get_sessions: "SELECT * FROM chat_sessions LIMIT 10",
 };
 
