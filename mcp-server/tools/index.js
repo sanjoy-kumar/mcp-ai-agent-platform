@@ -20,8 +20,8 @@ export const toolDefinitions = [
     sentiment.definition,
     indexPdf.definition,
     rag.definition,
-    agent.definition,
     webSearch.definition,
+    agent.definition
 ];
 
 export const toolHandlers = {
@@ -34,7 +34,7 @@ export const toolHandlers = {
     analyze_sentiment: sentiment.handler,
     index_pdf: indexPdf.handler,
     rag_search: rag.handler,
-    agent: agent.handler,
     web_search: webSearch.handler,
+    agent: agent.handler
 };
 
