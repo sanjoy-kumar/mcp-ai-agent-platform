@@ -11,7 +11,6 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MCP server
-
 const transport = new StdioClientTransport({
     command: "node",
     args: ["../mcp-server/index.mjs"],
@@ -24,11 +23,10 @@ const client = new Client({
 
 await client.connect(transport);
 
-console.log("✅ Connected to MCP server");
+console.log("Connected to MCP server.");
 
 
 // Chat endpoint
-
 app.post("/agent", async (req, res) => {
     try {
         const { query } = req.body;
@@ -38,8 +36,16 @@ app.post("/agent", async (req, res) => {
             arguments: { query },
         });
 
+        let resultText = response.content[0].text;
+        let toolsUsed = [];
+
+        if (response.tools_used) {
+            toolsUsed = response.tools_used;
+        }
+
         res.json({
-            result: response.content[0].text,
+            result: resultText,
+            tools_used: toolsUsed
         });
 
     } catch (err) {
@@ -52,7 +58,6 @@ app.post("/agent", async (req, res) => {
 });
 
 // Health check
-
 app.get("/", (req, res) => {
     res.send("MCP Bridge Running...");
 });
