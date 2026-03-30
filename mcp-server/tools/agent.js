@@ -2,8 +2,8 @@ import { z } from "zod";
 import { openai } from "../services/openai.js";
 import { toolHandlers } from "./index.js";
 import { toOpenAITools } from "../utils/openai-tools.js";
-import { validate } from '../utils/validator.js';
-import { redis } from "../services/redis.js";
+import { validate } from "../utils/validator.js";
+import redis from "../services/redis.js";
 
 const schema = z.object({
     query: z.string()
@@ -11,7 +11,7 @@ const schema = z.object({
 
 export const definition = {
     name: "agent",
-    description: "Advanced AI agent with tool-calling and caching",
+    description: "Advanced AI agent with tool-calling, caching, and web search",
     inputSchema: {
         type: "object",
         properties: {
@@ -23,12 +23,27 @@ export const definition = {
 
 export async function handler(args) {
     const { query } = validate(schema, args);
-    // --- REDIS CACHE CHECK ---
-    const cacheKey = `agent_cache:${query.trim().toLowerCase()}`;
-    const cachedResponse = await redis.get(cacheKey);
+    let usedTools = [];
 
-    if (cachedResponse) {
-        return JSON.parse(cachedResponse);
+    const normalizedQuery = query.trim().toLowerCase();
+
+    // Detect real-time queries (skip cache)
+    const isRealtimeQuery =
+        normalizedQuery.includes("weather") ||
+        normalizedQuery.includes("stock") ||
+        normalizedQuery.includes("latest") ||
+        normalizedQuery.includes("today") ||
+        normalizedQuery.includes("current") ||
+        normalizedQuery.includes("news");
+
+    const cacheKey = `agent_cache:${normalizedQuery}`;
+
+    if (!isRealtimeQuery) {
+        const cachedResponse = await redis.get(cacheKey);
+        if (cachedResponse) {
+            console.log("Cache hit");
+            return JSON.parse(cachedResponse);
+        }
     }
 
     const tools = toOpenAITools();
@@ -37,25 +52,36 @@ export async function handler(args) {
         {
             role: "system",
             content: `
-                    You are an intelligent AI assistant with access to tools.
+               You are an advanced AI agent with access to multiple tools.
 
-                    IMPORTANT RULES:
-                    - If user asks about "my PDF", "document", or "file", ALWAYS use the "rag_search" tool.
-                    - The PDFs are already indexed. DO NOT ask for filename.
-                    - Use retrieved context to answer questions.
-                    - Use "web_search" to find current information online.
-                    - Use "query_db" for internal database lookups.
-                    - Do NOT ask follow-up questions if you can use tools.
+                DECISION RULES:
 
-                    Available tools:
-                    - rag_search → search PDF content
-                    - get_weather → weather data
-                    - get_stock_price → stock info
-                    - query_db → database queries
-                    - web_search → search the live internet for latest news/data
+                1. Use "rag_search" for:
+                - "my PDF", "document", "file"
+                - Any question about uploaded content
 
-                    Be helpful and proactive.
-                    `
+                2. Use "web_search" for:
+                - latest information
+                - news
+                - current events
+                - anything time-sensitive
+                - when other tools do not provide enough info
+
+                3. Use "query_db" for structured/internal data
+
+                4. Use "get_weather" for weather
+
+                5. Use "get_stock_price" for stock prices
+
+                IMPORTANT:
+                - Always prefer tools over guessing
+                - If unsure → use web_search
+                - Do NOT ask user for filenames
+                - Combine tools when needed
+                - Use "query_db" ONLY when you know the exact query. If unsure, do NOT use it.
+
+                Be helpful, accurate, and concise.
+            `
         },
         {
             role: "user",
@@ -63,7 +89,6 @@ export async function handler(args) {
         }
     ];
 
-    // --- Agent loop (multi-step reasoning) ---
     for (let i = 0; i < 5; i++) {
         const response = await openai.chat.completions.create({
             model: "gpt-4o-mini",
@@ -74,20 +99,23 @@ export async function handler(args) {
 
         const message = response.choices[0].message;
 
-        if (message.tool_calls) {
+        // Handle Tool Calls (Multi-step)
+        if (message.tool_calls && message.tool_calls.length > 0) {
             messages.push(message);
 
             for (const toolCall of message.tool_calls) {
                 const name = toolCall.function.name;
-                const args = JSON.parse(toolCall.function.arguments);
+                const toolArgs = JSON.parse(toolCall.function.arguments);
 
                 const tool = toolHandlers[name];
+                if (!tool) throw new Error(`Tool not found: ${name}`);
 
-                if (!tool) {
-                    throw new Error(`Tool not found: ${name}`);
+                // Track tool name
+                if (!usedTools.includes(name)) {
+                    usedTools.push(name);
                 }
 
-                const result = await tool(args);
+                const result = await tool(toolArgs);
 
                 messages.push({
                     role: "tool",
@@ -95,20 +123,36 @@ export async function handler(args) {
                     content: result.content[0].text
                 });
             }
-
             continue;
         }
 
-        // --- PREPARE FINAL ANSWER & CACHE IT ---
+        // Handle Fallback (If the model fails to provide a substantial answer)
+        if (!message.content || message.content.length < 20) {
+            console.log("Fallback → web_search triggered");
+
+            if (!usedTools.includes("web_search")) {
+                usedTools.push("web_search");
+            }
+
+            const webResult = await toolHandlers["web_search"]({ query });
+
+            const fallbackResult = {
+                content: webResult.content,
+                tools_used: usedTools
+            };
+
+            return fallbackResult;
+        }
+
+        // Final Success Response
         const finalResult = {
-            content: [{
-                type: "text",
-                text: message.content
-            }]
+            content: [{ type: "text", text: message.content }],
+            tools_used: usedTools
         };
 
-        // --- Cache the result for 1 hour (3600 seconds) ----
-        await redis.set(cacheKey, JSON.stringify(finalResult), 'EX', 3600);
+        if (!isRealtimeQuery) {
+            await redis.set(cacheKey, JSON.stringify(finalResult), "EX", 3600);
+        }
 
         return finalResult;
     }
