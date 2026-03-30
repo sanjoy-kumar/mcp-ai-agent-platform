@@ -8,6 +8,7 @@ const envSchema = z.object({
     DB_PORT: z.string().optional(),
     STOCK_API_KEY: z.string().optional(),
     OPENAI_API_KEY: z.string().optional(),
+    TAVILY_API_KEY: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
