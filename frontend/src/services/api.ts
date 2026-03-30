@@ -15,5 +15,26 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+// Handle expired token globally
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      console.log("Token expired → redirecting to login");
+
+      // Remove invalid token
+      localStorage.removeItem("token");
+
+      // Redirect to login page
+      window.location.href = "/";
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+
 export default API;
+
+
 

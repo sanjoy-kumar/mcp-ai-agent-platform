@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import API from "../services/api";
 import "./Chat.css";
 import ReactMarkdown from "react-markdown";
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   role: "user" | "assistant";
@@ -25,11 +27,68 @@ export default function Chat() {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const activeSession = sessions.find((s) => s.id === activeId);
+  const navigate = useNavigate();
 
-  // 🔹 Load sessions on start
+  // Load sessions on start
   useEffect(() => {
     loadSessions();
   }, []);
+
+  useEffect(() => {
+        let timeout: ReturnType<typeof setTimeout>;
+
+        const logoutUser = () => {
+            console.log("User inactive → logging out");
+            localStorage.removeItem("token");
+            navigate("/");
+        };
+
+        const resetTimer = () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(logoutUser, 15 * 60 * 1000); 
+        };
+
+        // Track activity
+        window.addEventListener("mousemove", resetTimer);
+        window.addEventListener("keydown", resetTimer);
+        window.addEventListener("click", resetTimer);
+
+        // Start timer
+        resetTimer();
+
+        return () => {
+            clearTimeout(timeout);
+            window.removeEventListener("mousemove", resetTimer);
+            window.removeEventListener("keydown", resetTimer);
+            window.removeEventListener("click", resetTimer);
+        };
+    }, []);
+
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            navigate("/");
+            return;
+        }
+
+        try {
+            const decoded: any = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+
+            if (decoded.exp < currentTime) {
+            console.log("Token expired");
+
+            localStorage.removeItem("token");
+            navigate("/");
+            }
+        } catch (err) {
+            localStorage.removeItem("token");
+            navigate("/");
+        }
+    }, []);
+
 
   const loadSessions = async () => {
     try {
@@ -213,7 +272,7 @@ export default function Chat() {
             className="logout-btn"
             onClick={() => {
             localStorage.removeItem("token");
-            window.location.href = "/";
+            navigate("/");
             }}
         >
             Logout
@@ -286,7 +345,7 @@ export default function Chat() {
           🤖 MCP AI Agent Platform
         <h3 style={{fontSize:"14px"}}>A unified platform for intelligent AI agents and tool orchestration.</h3>
         </div>     
-        
+
         <div className="chat-box">
           {activeSession?.messages.map((msg, i) => (
 
@@ -295,7 +354,7 @@ export default function Chat() {
 
                 {msg.tools && msg.tools.length > 0 && (
                 <div className="tool-box">
-                    <span className="tool-label">🔧 Tools: </span>
+                    <span className="tool-label">Tools(🔧) Used: ▶ </span>
                     {msg.tools
                         .filter(tool => tool !== 'agent') // Hide the orchestrator itself
                         .map((tool) => (
