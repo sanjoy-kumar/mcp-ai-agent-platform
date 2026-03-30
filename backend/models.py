@@ -27,4 +27,5 @@ class ChatMessage(db.Model):
     session_id = db.Column(db.Integer, db.ForeignKey("chat_sessions.id"))
     role = db.Column(db.String(20))
     text = db.Column(db.Text)
+    tools = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

@@ -3,6 +3,7 @@ from services.mcp_service import call_mcp_agent
 from models import ChatSession, ChatMessage
 from database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
+import json
 
 chat_bp = Blueprint("chat", __name__)
 
@@ -34,13 +35,18 @@ def chat():
     bot_msg = ChatMessage(
         session_id=session_id,
         role="assistant",
-        text=result.get("result")
+        text=result["result"],
+        tools=json.dumps(result.get("tools", []))
     )
-    db.session.add(bot_msg)
 
+    db.session.add(bot_msg)
     db.session.commit()
 
-    return jsonify(result)
+    # Return Response
+    return jsonify({
+        "result": result["result"],
+        "tools": result.get("tools", [])
+    })
 
 
 @chat_bp.route("/session", methods=["POST"])
@@ -82,7 +88,8 @@ def get_messages(session_id):
     return jsonify([
         {
             "role": m.role,
-            "text": m.text
+            "text": m.text,
+            "tools": json.loads(m.tools) if m.tools else []
         } for m in messages
     ])
 
