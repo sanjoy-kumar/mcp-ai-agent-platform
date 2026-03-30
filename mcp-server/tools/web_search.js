@@ -1,74 +1,83 @@
-import { safeFetch } from '../utils/fetch.js';
-import { z } from 'zod';
-import { validate } from '../utils/validator.js';
+import { z } from "zod";
+import axios from "axios";
+import { env } from "../config/env.js";
+import { validate } from "../utils/validator.js";
 
 const schema = z.object({
-    query: z.string().min(1).describe("The search query to look up on the live web")
+    query: z.string()
 });
 
 export const definition = {
     name: "web_search",
-    description: "Search the live internet for the latest news, real-time events, or data not found in internal databases.",
+    description:
+        "Search the live internet for latest news, real-time events, and up-to-date information.",
     inputSchema: {
         type: "object",
         properties: {
-            query: {
-                type: "string",
-                description: "The specific search query"
-            }
+            query: { type: "string" }
         },
         required: ["query"]
     }
 };
 
 export async function handler(args) {
+    const { query } = validate(schema, args);
+
     try {
-        const { query } = validate(schema, args);
+        const res = await axios.post("https://api.tavily.com/search", {
+            api_key: env.TAVILY_API_KEY,
+            query,
+            search_depth: "advanced",
+            include_answer: true,
+            max_results: 5
+        });
 
-        // Using Tavily API (requires TAVILY_API_KEY in your .env)
-        const url = 'https://api.tavily.com/search';
+        const results = res.data.results || [];
+        const answer = res.data.answer;
 
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                api_key: process.env.TAVILY_API_KEY,
-                query: query,
-                search_depth: "advanced",
-                max_results: 5,
-                include_answer: true
-            })
-        };
-
-        const data = await safeFetch(url, options);
-
-        if (!data || !data.results) {
-            throw new Error("No search results were returned from the web provider.");
+        if (!results.length && !answer) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: "No results found."
+                    }
+                ]
+            };
         }
 
-        // Extract the AI-ready answer and the top 5 snippets
-        const aiAnswer = data.answer ? `Summary: ${data.answer}\n\n` : "";
-        const results = data.results.map(res =>
-            `Source: ${res.url}\nTitle: ${res.title}\nSnippet: ${res.content}`
-        ).join("\n\n");
+        let formatted = "";
+
+        if (answer) {
+            formatted += `Answer:\n${answer}\n\n`;
+        }
+
+        if (results.length) {
+            formatted += results
+                .map((r, i) => {
+                    return `${i + 1}. ${r.title}\n${r.content}\n${r.url}`;
+                })
+                .join("\n\n");
+        }
 
         return {
-            content: [{
-                type: "text",
-                text: `${aiAnswer}Detailed Results:\n${results}`
-            }]
+            content: [
+                {
+                    type: "text",
+                    text: formatted
+                }
+            ]
         };
 
-    } catch (error) {
-        // Keeps the MCP agent loop running even if the API call fails
+    } catch (err) {
+        console.error("Tavily error:", err.response?.data || err.message);
         return {
-            content: [{
-                type: "text",
-                text: `Web Search Error: ${error.message}. Please try a different query or rely on internal knowledge.`
-            }],
-            isError: true
+            content: [
+                {
+                    type: "text",
+                    text: "Web search failed. Please try again."
+                }
+            ]
         };
     }
 }
