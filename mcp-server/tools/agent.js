@@ -41,7 +41,6 @@ export async function handler(args) {
     if (!isRealtimeQuery) {
         const cachedResponse = await redis.get(cacheKey);
         if (cachedResponse) {
-            console.log("Cache hit");
             return JSON.parse(cachedResponse);
         }
     }
@@ -88,6 +87,16 @@ export async function handler(args) {
                 4. Use "get_weather" for weather
 
                 5. Use "get_stock_price" for stock prices
+
+                6. Use "analyze_sentiment" when:
+                    - user expresses opinion
+                    - user shares feelings
+                    - text includes words like: "love", "hate", "good", "bad", "amazing", "terrible"
+                    - product reviews, feedback, emotions
+
+                    Example:
+                    User: "I love this product"
+                    → call analyze_sentiment with { "text": "I love this product" }
 
                 IMPORTANT:
                 - Always prefer tools over guessing
