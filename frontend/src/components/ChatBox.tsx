@@ -35,7 +35,7 @@ export default function ChatBox({ messages, loading, bottomRef }: ChatBoxProps) 
          <ReactMarkdown>{msg.text}</ReactMarkdown>
           {msg.tools && msg.tools.filter(t => t !== 'agent').length > 0 && (
             <div className="tool-box">
-              <span className="tool-label">Tools(🔧) Used: ▶ </span>
+              <span className="tool-label">Tools(🔧) Used: 👉 </span>
               {msg.tools
                 .filter((tool) => tool !== "agent")
                 .map((tool) => (

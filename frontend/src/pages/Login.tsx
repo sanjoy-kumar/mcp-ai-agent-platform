@@ -33,9 +33,16 @@ export default function Login() {
   return (
     <div className="login-container">
       <div className="login-card">
-
-        <h2 className="login-title">🤖 MCP AI Agent Platform</h2>
-        <p className="login-subtitle">Login to continue</p>
+        <div className="login-header-container">
+        <div className="login-image-section">
+          <img src="favicon.ico" alt="MCP AI Agent Platform" className="login-logo" />
+        </div>
+        
+        <div className="login-text-section">
+          <h2 className="login-title">MCP AI Agent Platform</h2>
+          <p className="login-subtitle">Login to continue</p>
+        </div>
+      </div>
 
         {error && <div className="login-error">{error}</div>}
 

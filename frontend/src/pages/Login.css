@@ -3,7 +3,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(120deg, #4f46e5, #9333ea);
+  background: linear-gradient(120deg, #7a4edee7 0%, #09fc29 100%);
   padding: 20px;
 }
 
@@ -84,3 +84,31 @@
   border-radius: 6px;
   font-size: 14px;
 }
+
+.login-header-container {
+  display: flex;
+  align-items: center; /* Vertically centers the logo with the text */
+  width: 100%;
+  gap: 0px;           /* Adds a little breathing room between image and text */
+  margin-bottom: 10px;
+}
+
+.login-image-section {
+  flex-basis: 20%;     /* Sets width to 20% */
+  display: flex;
+  justify-content: center;
+}
+
+.login-image-section img {
+  max-width: 100%;     /* Ensures the logo doesn't overflow the 30% container */
+  height: auto;
+}
+
+.login-text-section {
+  flex-basis: 80%;     /* Sets width to 80% */
+}
+
+.login-title, .login-subtitle {
+  margin: 0;           /* Removes default browser spacing for a cleaner look */
+}
+
