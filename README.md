@@ -36,10 +36,15 @@ A production-ready multi-tool AI agent system that combines RAG (PDF search), da
 
 ## 🎥 Demo
 
+### 🎥 GIF (quick preview)
+
 ![Demo](./frontend/public/screenshots/demo.gif)
 
----
 
+### 🎬 Demo Video
+
+[Watch on YouTube](https://youtu.be/l6yVnAIuK9M)
+---
 ## 🧠 Features
 
 - 🤖 ChatGPT-style AI interface
