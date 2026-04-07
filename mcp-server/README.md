@@ -1,4 +1,4 @@
-# MCP AI Agent Platform
+# MCP AI Agent Platform - MCP Server
 
 Production-grade AI Agent Platform with MCP, RAG, and Multi-Tool Reasoning
 
@@ -57,7 +57,7 @@ User → AI Agent → Tool Selection → Tool Execution → Response
 
 ## Project Structure
 ```text
-mcp-ai-agent-platform/
+mcp-server/
 │
 ├── index.mjs
 ├── server.mjs
@@ -79,7 +79,7 @@ mcp-ai-agent-platform/
 
 ```bash
 git clone https://github.com/sanjoy-kumar/mcp-ai-agent-platform.git
-cd mcp-ai-agent-platform
+cd mcp-ai-agent-platform/mcp-server
 ```
 ### 2. Install Dependencies
 ```bash
@@ -88,7 +88,7 @@ npm install
 
 ### 3. Configure Environment
 
-Create .env:
+Create .env or rename the .env-example as .env:
 
 ```text
 OPENAI_API_KEY=your_key
@@ -138,17 +138,3 @@ Then click the **Connect** Button.
 - Restricts database queries to predefined statements
 - Validates all inputs
 - Uses environment variables for sensitive data
-
-
-## Final Architecture
-React UI (mcp-ai-ui)
-   ↓
-HTTP (axios)
-   ↓
-Express API (server.js)
-   ↓
-MCP Client
-   ↓
-MCP Server (index.mjs)
-   ↓
-Tools (weather, stock, RAG)
